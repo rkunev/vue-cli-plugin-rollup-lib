@@ -6,35 +6,39 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const postcss = require('rollup-plugin-postcss');
 const { terser } = require('rollup-plugin-terser');
 const typescript = require('rollup-plugin-typescript2');
+const img = require('rollup-plugin-img');
 
 const chalk = require('chalk');
 const { log } = require('@vue/cli-shared-utils');
 
 const { parseName, getOutputDir, getTSConfig, buildGlobalsHash, buildExternalList } = require('./utils');
 
-const build = async ({
-    input,
-    output,
-    format,
-    minify,
-    umdGlobalName,
-    globals,
-    external,
-    productionSourceMap,
-    cssFilePath = false,
-    tsConfig = null,
-}) => {
+const build = async (api, options, args, { format, minify }) => {
+    const outputDir = getOutputDir(options, args);
+
+    const tsConfig = getTSConfig(api);
+
+    const globals = buildGlobalsHash(args.globals);
+    const external = buildExternalList(args.external);
+
+    // use the provided name, otherwise use `name` from package.json
+    const [baseName, umdGlobalName] = parseName(api.service.pkg.name, args.name);
+
+    const entry = args.entry || args._[0] || 'src/App.vue';
+
+    const sourceMaps = options.productionSourceMap && !!minify;
+
     const inputOptions = {
-        input,
+        input: api.resolve(entry),
         external,
         plugins: [
             cjs(),
             nodeResolve(),
             postcss({
-                extract: cssFilePath,
+                extract: api.resolve(`${outputDir}/${baseName}${minify ? '.min' : ''}.css`),
                 inject: false,
                 minimize: !!minify,
-                sourceMap: productionSourceMap && !!minify,
+                sourceMap: sourceMaps,
             }),
             !!tsConfig && typescript(tsConfig),
             vue({
@@ -51,6 +55,10 @@ const build = async ({
                 babelrc: false,
                 presets: [['@vue/babel-preset-app', { useBuiltIns: false }]],
             }),
+            img({
+                limit: -1,
+                output: api.resolve(outputDir),
+            }),
             !!minify && terser(),
         ],
     };
@@ -60,69 +68,21 @@ const build = async ({
     return bundle.write({
         format,
         globals,
-        file: output,
+        file: api.resolve(`${outputDir}/${baseName}.${format}${minify ? '.min' : ''}.js`),
         name: umdGlobalName,
-        sourcemap: productionSourceMap && !!minify,
+        sourcemap: sourceMaps,
     });
 };
 
-const createBundle = async (api, options, args) => {
-    const outputDir = getOutputDir(options, args);
-
-    const tsConfig = getTSConfig(api);
-
-    const globals = buildGlobalsHash(args.globals);
-    const external = buildExternalList(args.external);
-
-    // use the provided name, otherwise use `name` from package.json
-    const [baseName, umdGlobalName] = parseName(api.service.pkg.name, args.name);
-
-    const entry = args.entry || args._[0] || 'src/App.vue';
-    const input = api.resolve(entry);
-
+const bundle = async (api, options, args) => {
     const entries = [
-        {
-            input,
-            external,
-            umdGlobalName,
-            globals,
-            tsConfig,
-            productionSourceMap: options.productionSourceMap,
-            format: 'umd',
-            output: api.resolve(`${outputDir}/${baseName}.umd.js`),
-            cssFilePath: api.resolve(`${outputDir}/${baseName}.css`),
-        },
-        {
-            input,
-            external,
-            umdGlobalName,
-            globals,
-            tsConfig,
-            productionSourceMap: options.productionSourceMap,
-            format: 'umd',
-            minify: true,
-            output: api.resolve(`${outputDir}/${baseName}.umd.min.js`),
-            cssFilePath: api.resolve(`${outputDir}/${baseName}.min.css`),
-        },
-        {
-            input,
-            external,
-            tsConfig,
-            productionSourceMap: options.productionSourceMap,
-            format: 'esm',
-            output: api.resolve(`${outputDir}/${baseName}.esm.js`),
-        },
-        {
-            input,
-            external,
-            tsConfig,
-            productionSourceMap: options.productionSourceMap,
-            format: 'cjs',
-            output: api.resolve(`${outputDir}/${baseName}.common.js`),
-        },
+        { format: 'umd' },
+        { format: 'umd', minify: true },
+        { format: 'cjs' },
+        { format: 'esm' },
     ];
 
-    return Promise.all(entries.map(build));
+    return Promise.all(entries.map(e => build(api, options, args, e)));
 };
 
-module.exports = createBundle;
+module.exports = bundle;

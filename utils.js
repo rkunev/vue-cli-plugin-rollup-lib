@@ -43,7 +43,6 @@ const buildGlobalsHash = (globals = '') => {
 
 const buildExternalList = external => ['vue'].concat(external ? external.split(',') : []);
 
-const isMap = name => /\.map$/.test(name);
 const isJS = name => /\.js$/.test(name);
 const isCSS = name => /\.css$/.test(name);
 const formatSize = size => (size / 1024).toFixed(2) + ' KiB';
@@ -52,7 +51,7 @@ const makeRow = (a, b, c) => `  ${a}\t    ${b}\t ${c}`;
 const getOutputDir = (options, args) => args.dest || options.outputDir;
 
 const cleanOutputDir = async (api, options, args) => {
-    const outputDir = getOutputDir(options, args);
+    const outputDir = api.resolve(getOutputDir(options, args));
 
     // when --no-clean is passed the value of `clean` is false
     // when it's not - `clean` is undefined or null and by default we'll clean the dir
@@ -66,7 +65,7 @@ const printStats = (api, options, args) => {
 
     const assets = fse
         .readdirSync(api.resolve(outputDir))
-        .filter(fileName => !isMap(fileName))
+        .filter(fileName => isCSS(fileName) || isJS(fileName))
         .map(fileName => {
             const filePath = api.resolve(`${outputDir}/${fileName}`);
 

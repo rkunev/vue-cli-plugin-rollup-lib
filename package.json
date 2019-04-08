@@ -6,17 +6,22 @@
   "author": "Rosen Kanev <rkunev@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@babel/core": "^7.4.3",
+    "@vue/babel-preset-app": "^3.5.5",
     "@vue/cli-shared-utils": "^3.5.1",
     "fs-extra": "^7.0.1",
     "lodash.kebabcase": "^4.1.1",
+    "postcss": "^7.0.14",
     "rollup": "^1.7.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.2.1",
+    "rollup-plugin-img": "^1.1.0",
     "rollup-plugin-node-resolve": "^4.1.0",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.20.1",
-    "rollup-plugin-vue": "^4.7.2"
+    "rollup-plugin-vue": "^4.7.2",
+    "vue-template-compiler": "^2.6.10"
   },
   "devDependencies": {
     "prettier": "^1.16.4"

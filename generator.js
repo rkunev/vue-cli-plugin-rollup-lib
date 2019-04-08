@@ -6,7 +6,7 @@ module.exports = (api, options) => {
 
     api.extendPackage({
         scripts: {
-            build: 'vue-cli-service build',
+            [options.buildCommandType]: `vue-cli-service ${options.buildCommandType}`,
         },
     });
 
