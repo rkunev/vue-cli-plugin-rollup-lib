@@ -11,15 +11,14 @@ const img = require('rollup-plugin-img');
 const chalk = require('chalk');
 const { log } = require('@vue/cli-shared-utils');
 
-const { parseName, getOutputDir, getTSConfig, buildGlobalsHash, buildExternalList } = require('./utils');
+const { parseName, getOutputDir, getTSConfig, buildExternalModules } = require('./utils');
 
 const build = async (api, options, args, { format, minify }) => {
     const outputDir = getOutputDir(options, args);
 
     const tsConfig = getTSConfig(api);
 
-    const globals = buildGlobalsHash(args.globals);
-    const external = buildExternalList(args.external);
+    const { globals, external } = buildExternalModules(args.external);
 
     // use the provided name, otherwise use `name` from package.json
     const [baseName, umdGlobalName] = parseName(api.service.pkg.name, args.name);

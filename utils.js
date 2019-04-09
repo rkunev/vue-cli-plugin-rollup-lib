@@ -26,22 +26,24 @@ const parseName = (pkgName, argsName) => {
     return [baseName, umdGlobalName];
 };
 
-const buildGlobalsHash = (globals = '') => {
+const buildExternalModules = (globals = '') => {
     return globals.split(',').reduce(
         (prev, next) => {
             const [key, value] = next.split(':');
 
             if (key) {
-                prev[key] = value;
+                prev.globals[key] = value || key;
+                prev.external.push(key);
             }
 
             return prev;
         },
-        { vue: 'Vue' }
+        {
+            globals: { vue: 'Vue' },
+            external: ['vue']
+        }
     );
 };
-
-const buildExternalList = external => ['vue'].concat(external ? external.split(',') : []);
 
 const isJS = name => /\.js$/.test(name);
 const isCSS = name => /\.css$/.test(name);
@@ -114,8 +116,7 @@ module.exports = {
     stripPkgScope,
     kebabToPascalCase,
     parseName,
-    buildGlobalsHash,
-    buildExternalList,
+    buildExternalModules,
     getOutputDir,
     cleanOutputDir,
     printStats,

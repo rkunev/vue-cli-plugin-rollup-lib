@@ -12,10 +12,9 @@ module.exports = (api, options) => {
             usage: `vue-cli-service build [options] [entry]`,
             options: {
                 '--dest': `specify output directory (default: ${options.outputDir})`,
-                '--name': `name for lib or web-component mode (default: "name" in package.json or entry filename)`,
-                '--no-clean': `do not remove the dist directory before building the project (default: true)`,
-                '--globals': `specify id: variableName pairs necessary for external imports in umd bundle`,
-                '--external': `specify module IDs that should remain external to the bundle`,
+                '--name': 'name for lib or web-component mode (default: "name" in package.json or entry filename)',
+                '--no-clean': 'do not remove the dist directory before building the project (default: true)',
+                '--external': 'specify id: variableName pairs for imports that should remain external to the bundle',
             },
         },
         async args => {
