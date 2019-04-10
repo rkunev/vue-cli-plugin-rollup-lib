@@ -20,8 +20,7 @@
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.20.1",
-    "rollup-plugin-vue": "^4.7.2",
-    "vue-template-compiler": "^2.6.10"
+    "rollup-plugin-vue": "^4.7.2"
   },
   "devDependencies": {
     "prettier": "^1.16.4"
